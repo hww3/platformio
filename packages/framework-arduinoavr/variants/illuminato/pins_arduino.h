@@ -25,7 +25,6 @@
   -----------
   11/25/11  - ryan@ryanmsutton.com - Add pins for Sanguino 644P and 1284P
   07/15/12  - ryan@ryanmsutton.com - Updated for arduino0101
-  05/30/17  - william@welliver.org - Updated for Illuminato Genesis
 
   Improvements by Kristian Sloth Lauszus, lauszus@gmail.com
 */
@@ -82,35 +81,40 @@ static const uint8_t A7 = 24;
 #define NUM_DIGITAL_PINS            42
 #define NUM_ANALOG_INPUTS           6
 
+#ifdef EXTERNAL_NUM_INTERRUPTS
+#undef EXTERNAL_NUM_INTERRUPTS
+#define EXTERNAL_NUM_INTERRUPTS 1
+#endif
+
 #define analogInputToDigitalPin(p)  ((p < 6) ? 36 + (p): -1)
 #define analogPinToChannel(p)       ((p < 6) ? (p) : 36 + (p))
 
 #define digitalPinHasPWM(p)         ((p) == 15 || (p) == 16 || (p) == 17 || (p) == 42 )
 
-#if 0
+#define digitalPinToPCICR(p)        ( (((p) >= 0) && ((p) <= 7)) ? (&EIMSK) : \
+									(((p) >= 14) && ((p) <= 17)) ? (&EIMSK) : \
+									(((p) == 42)) ? (&EIMSK) : \
+									((uint8_t *)0) )
 
-#define digitalPinToPCICR(p)        ( (((p) >= 0) && ((p) <= 31)) ? (&PCICR) : ((uint8_t *)0) )
 
-#define digitalPinToPCICRbit(p)     ( (((p) >= 24) && ((p) <= 31)) ? 0 : \
-                                    ( (((p) >=  0) && ((p) <=  7)) ? 1 : \
-                                    ( (((p) >= 16) && ((p) <= 23)) ? 2 : \
-                                    ( (((p) >=  8) && ((p) <= 15)) ? 3 : \
-                                    0 ) ) ) )
+#define digitalPinToPCICRbit(p)     ( (((p) >= 0) && ((p) <= 7)) ? (PCIE0) : \
+									(((p) >= 14) && ((p) <= 17)) ? (PCIE1) : \
+									(((p) == 42)) ? (5) : \
+									(0) )
 
-#define digitalPinToPCMSK(p)        ( (((p) >= 24) && ((p) <= 31)) ? (&PCMSK0) : \
-                                    ( (((p) >=  0) && ((p) <=  7)) ? (&PCMSK1) : \
-                                    ( (((p) >= 16) && ((p) <= 23)) ? (&PCMSK2) : \
-                                    ( (((p) >=  8) && ((p) <= 15)) ? (&PCMSK3) : \
+										
+#define digitalPinToPCMSK(p)        ( (((p) >=  0) && ((p) <=  7)) ? (&PCMSK0) : \
+                                    ( (((p) >=  14) && ((p) <= 17)) ? (&PCMSK1) : \
+	                                ( (((p) ==  42) ? (&PCMSK1) : \
                                     ((uint8_t *)0) ) ) ) )
 
 
-#define digitalPinToPCMSKbit(p)     ( (((p) >= 24) && ((p) <= 31)) ? (31 - (p)) : \
-                                    ( (((p) >=  0) && ((p) <=  7)) ? (p) : \
-                                    ( (((p) >= 16) && ((p) <= 23)) ? ((p) - 16) : \
-                                    ( (((p) >=  8) && ((p) <= 15)) ? ((p) - 8) : \
-                                    0 ) ) ) )
+#define digitalPinToPCMSKbit(p)     ( (((p) >=  0) && ((p) <=  7)) ? (p) : \
+                                    ( (((p) == 14) ? (0) : \
+                                    ( (((p) >=  15) && ((p) <= 17)) ? ((p) - 11) : \
+									( (((p) == 42) ? (7) : \
+                                    0 ) ) ) ) ) )
 
-#endif
 																		
 #define digitalPinToInterrupt(p)    ((p) == 21 ? 0	 : NOT_AN_INTERRUPT)))
 
